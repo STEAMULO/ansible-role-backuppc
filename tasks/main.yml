@@ -1,0 +1,21 @@
+---
+
+  - name: create a new sudo user for backuppc
+    user:
+      name={{ backuppc_user }}
+      state=present
+      groups="sudo"
+      shell=/bin/bash
+      append=yes
+    become: yes
+
+  - name: Sudoers | update sudoers file for backuppc and validate
+    lineinfile: "dest=/etc/sudoers
+      insertafter=EOF
+      line='{{ backuppc_user }} ALL=NOPASSWD: /usr/bin/rsync --server --sender *'
+      regexp='{{ backuppc_user }} ALL=NOPASSWD: /usr/bin/rsync --server --sender *'
+      state=present"
+    become: yes
+
+  - name: Add ssh user keys for backuppc
+    authorized_key: user={{ backuppc_user }} key="{{ backuppc_public_key }}" state=present exclusive=yes
